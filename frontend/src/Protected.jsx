@@ -13,7 +13,7 @@ export default function Protected({ children }) {
     try {
       const response = await axios.get(api + "/auth/me/", {
         headers: {
-          Authorization: "Bearer: " + token,
+          Authorization: "Bearer " + token,
         },
       });
 
@@ -21,6 +21,10 @@ export default function Protected({ children }) {
 
       console.log(response.data.message);
     } catch (error) {
+      console.log("STATUS:", error.response?.status);
+      console.log("DATA:", error.response?.data);
+      console.log("TOKEN:", token);
+
       if (error.response) {
         setIsAuth(false);
       } else {

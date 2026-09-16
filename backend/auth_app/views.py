@@ -60,7 +60,7 @@ def login(request):
 
     user = authenticate(username=username,password=password)
     if not user :
-        return Response({"message":"wrong credentials"})
+        return Response({"message":"wrong credentials"},status=401)
 
     token = AccessToken.for_user(user)
     return Response({

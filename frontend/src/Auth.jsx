@@ -3,20 +3,48 @@ import { useState, useEffect } from "react";
 import { Box, Typography, TextField, Stack, Button } from "@mui/material";
 import axios from "axios";
 const api = import.meta.env.VITE_API_URL;
-
+import { useNavigate } from "react-router-dom";
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  async function handle_register() {
+  async function handle_login() {
+    if (!email.trim() || !password.trim()) {
+      alert("empty fields");
+      return;
+    }
     try {
-      const response = await axios.post(api + "/auth/register/", {
-        username: "user1@example.com",
-        password: "string",
+      const response = await axios.post(api + "/auth/login/", {
+        username: email.trim(),
+        password: password.trim(),
       });
 
       localStorage.setItem("token", response.data.access);
       console.log(localStorage.getItem("token"));
+      navigate("/");
+    } catch (error) {
+      if (error.response?.status == 401) {
+        alert("invalid credentials");
+      }
+    }
+  }
+
+  async function handle_register() {
+    if (!email.trim() || !password.trim()) {
+      alert("empty fields");
+      return;
+    }
+
+    try {
+      const response = await axios.post(api + "/auth/register/", {
+        username: email.trim(),
+        password: password.trim(),
+      });
+
+      localStorage.setItem("token", response.data.access);
+      console.log(localStorage.getItem("token"));
+      navigate("/");
     } catch (error) {
       alert(error);
     }
@@ -55,7 +83,9 @@ export default function Auth() {
         ></TextField>
 
         <Stack direction={"row"} spacing={1}>
-          <Button variant="outlined">Login</Button>
+          <Button variant="outlined" onClick={() => handle_login()}>
+            Login
+          </Button>
           <Button variant="outlined" onClick={() => handle_register()}>
             Sign Up
           </Button>
