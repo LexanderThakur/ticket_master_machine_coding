@@ -1,5 +1,5 @@
 import { Paper, Typography, Stack, Box } from "@mui/material";
-
+import { useNavigate } from "react-router-dom";
 export default function EventCard({
   id = 1,
   name = "Event Name",
@@ -7,8 +7,10 @@ export default function EventCard({
   venue = "Venue",
   performer = "Performer",
 }) {
+  const navigate = useNavigate();
   return (
     <Paper
+      onClick={() => navigate("/eventDetail/" + id + "/")}
       elevation={4}
       sx={{
         width: 320,

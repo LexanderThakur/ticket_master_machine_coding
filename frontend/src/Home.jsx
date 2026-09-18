@@ -2,11 +2,11 @@ import { Box, Stack, Typography } from "@mui/material";
 import EventCard from "./EventCard";
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 const api = import.meta.env.VITE_API_URL;
 export default function Home() {
   const [events, setEvents] = useState([]);
-
+  const navigate = useNavigate();
   async function get_events() {
     try {
       const response = await axios.get(api + "/events/");

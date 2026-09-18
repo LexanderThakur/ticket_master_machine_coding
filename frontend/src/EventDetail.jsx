@@ -1,19 +1,34 @@
-import { Box, Stack, Typography, Tooltip } from "@mui/material";
-
+import {
+  Box,
+  Stack,
+  Typography,
+  Tooltip,
+  Chip,
+  Paper,
+  Divider,
+  Button,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
+import { useNavigate } from "react-router-dom";
 const api = import.meta.env.VITE_API_URL;
+
 export default function EventDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
-
   const [selected, setSelected] = useState([]);
-  const map = {};
-  for (const ticket of tickets) {
-    map[ticket.seat] = ticket;
-  }
+
+  const [event, setEvent] = useState({
+    id: "1",
+    name: "Event",
+    description: "des",
+    venue: "MSG",
+    performer: "Tame Impala",
+  });
 
   const [venue, setVenue] = useState({
     id: 1,
@@ -24,82 +39,253 @@ export default function EventDetail() {
     },
   });
 
+  const ticketMap = {};
+
+  for (const ticket of tickets) {
+    ticketMap[ticket.seat] = ticket;
+  }
+
+  function toggleSeat(seat) {
+    setSelected((prev) => {
+      if (prev.includes(seat)) {
+        return prev.filter((s) => s !== seat);
+      }
+
+      return [...prev, seat];
+    });
+  }
+
   async function sync_tickets() {
     try {
       const response = await axios.get(api + "/events/" + id + "/");
 
+      setEvent(response.data.event);
       setTickets(response.data.tickets);
-      console.log(response.data.tickets);
     } catch (error) {
       console.log(error);
     }
   }
+
   async function get_venue() {
     try {
       const response = await axios.get(api + "/venues/" + id);
+
       setVenue(response.data.message);
     } catch (error) {
       console.log(error);
     }
   }
 
-  const [event, setEvent] = useState({
-    id: "1",
-    name: "Event",
-    description: "des",
-    venue: "MSG",
-    performer: "Tame Impala",
-  });
-
   useEffect(() => {
     get_venue();
     sync_tickets();
   }, [id]);
-  return (
-    <Stack sx={{ height: "100vh", width: "100vw", padding: 2 }}>
-      <Stack spacing={3}>
-        <Typography variant="h3">{event.name}</Typography>
-        <Typography variant="subtitle">{event.description}</Typography>
-        <Typography variant="body1">{event.performer}</Typography>
-        <Typography variant="body1">{event.venue}</Typography>
-      </Stack>
 
-      {/* Making The Seat Map */}
-      <Stack
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        width: "100%",
+        bgcolor: "#f5f5f5",
+        p: { xs: 2, md: 5 },
+      }}
+    >
+      <ArrowBackIcon
         sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          border: "1px solid black",
+          "&:hover": {
+            cursor: "pointer",
+          },
+        }}
+        onClick={() => navigate("/")}
+      ></ArrowBackIcon>
+      <Stack
+        spacing={4}
+        sx={{
+          maxWidth: 1100,
+          mx: "auto",
         }}
       >
-        {Object.entries(venue.seat_map).map(([row, seats]) => {
-          return (
-            <Stack direction={"row"}>
-              {seats.map((ele, idx) => {
-                return (
-                  <Tooltip title={ele} placement="top">
-                    <EventSeatIcon
-                      sx={{
-                        color:
-                          map[ele]?.status === "available"
-                            ? "rgb(128, 201, 82)"
-                            : "rgb(230, 17, 17)",
-                        "&:hover": {
-                          cursor:
-                            map[ele]?.status === "available"
-                              ? "pointer"
-                              : "not-allowed",
-                        },
-                      }}
-                      fontSize="large"
-                    ></EventSeatIcon>
-                  </Tooltip>
-                );
-              })}
+        {/* Event information */}
+        <Paper
+          elevation={2}
+          sx={{
+            p: 4,
+            borderRadius: 3,
+          }}
+        >
+          <Stack spacing={1}>
+            <Typography variant="h3" fontWeight={700}>
+              {event.name}
+            </Typography>
+
+            <Typography color="text.secondary">{event.description}</Typography>
+
+            <Stack direction="row" spacing={3} sx={{ pt: 1 }}>
+              <Typography variant="body1">🎤 {event.performer}</Typography>
+
+              <Typography variant="body1">📍 {event.venue}</Typography>
             </Stack>
-          );
-        })}
+          </Stack>
+        </Paper>
+
+        {/* Seat map */}
+        <Paper
+          elevation={2}
+          sx={{
+            p: { xs: 2, md: 5 },
+            borderRadius: 3,
+          }}
+        >
+          <Stack spacing={3} alignItems="center">
+            <Typography variant="h5" fontWeight={600}>
+              Select Your Seats
+            </Typography>
+
+            {/* Stage */}
+            <Box
+              sx={{
+                width: "70%",
+                maxWidth: 500,
+                textAlign: "center",
+                py: 1,
+                borderRadius: 1,
+                bgcolor: "#eeeeee",
+              }}
+            >
+              <Typography variant="caption" fontWeight={700} letterSpacing={2}>
+                STAGE
+              </Typography>
+            </Box>
+
+            {/* Seats */}
+            <Stack spacing={1.5} alignItems="center">
+              {Object.entries(venue.seat_map).map(([row, seats]) => (
+                <Stack
+                  key={row}
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                >
+                  <Typography
+                    sx={{
+                      width: 25,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {row}
+                  </Typography>
+
+                  {seats.map((seat) => {
+                    const available = ticketMap[seat]?.status === "available";
+
+                    const isSelected = selected.includes(seat);
+
+                    return (
+                      <Tooltip key={seat} title={seat} placement="top">
+                        <EventSeatIcon
+                          fontSize="large"
+                          onClick={() => {
+                            if (available) {
+                              toggleSeat(seat);
+                            }
+                          }}
+                          sx={{
+                            fontSize: 40,
+
+                            color: !available
+                              ? "#e53935"
+                              : isSelected
+                                ? "#1976d2"
+                                : "#66bb6a",
+
+                            transition: "0.15s",
+
+                            "&:hover": {
+                              cursor: available ? "pointer" : "not-allowed",
+
+                              transform: available ? "scale(1.15)" : "none",
+                            },
+                          }}
+                        />
+                      </Tooltip>
+                    );
+                  })}
+                </Stack>
+              ))}
+            </Stack>
+
+            {/* Legend */}
+            <Stack direction="row" spacing={3} sx={{ pt: 2 }}>
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <EventSeatIcon sx={{ color: "#66bb6a" }} />
+                <Typography variant="body2">Available</Typography>
+              </Stack>
+
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <EventSeatIcon sx={{ color: "#1976d2" }} />
+                <Typography variant="body2">Selected</Typography>
+              </Stack>
+
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <EventSeatIcon sx={{ color: "#e53935" }} />
+                <Typography variant="body2">Unavailable</Typography>
+              </Stack>
+            </Stack>
+          </Stack>
+        </Paper>
+
+        {/* Selection summary */}
+        <Paper
+          elevation={2}
+          sx={{
+            p: 3,
+            borderRadius: 3,
+          }}
+        >
+          <Stack spacing={2}>
+            <Typography variant="h6" fontWeight={600}>
+              Selected Seats
+            </Typography>
+
+            <Divider />
+
+            {selected.length === 0 ? (
+              <Typography color="text.secondary">No seats selected</Typography>
+            ) : (
+              <Stack direction="row" flexWrap="wrap">
+                {selected.map((seat) => (
+                  <Chip
+                    key={seat}
+                    label={seat}
+                    color="primary"
+                    onDelete={() => toggleSeat(seat)}
+                    sx={{ m: 0.5 }}
+                  />
+                ))}
+              </Stack>
+            )}
+
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ pt: 1 }}
+            >
+              <Typography>
+                {selected.length} seat
+                {selected.length !== 1 ? "s" : ""} selected
+              </Typography>
+            </Stack>
+            <Button
+              variant="contained"
+              disabled={selected.length === 0}
+              size="large"
+            >
+              Continue
+            </Button>
+          </Stack>
+        </Paper>
       </Stack>
-    </Stack>
+    </Box>
   );
 }

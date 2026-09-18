@@ -8,8 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { login, register } from "./api/auth.js";
 
 export default function Auth() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("test@gmail.com");
+  const [password, setPassword] = useState("1234");
   const navigate = useNavigate();
 
   async function handle_login() {
