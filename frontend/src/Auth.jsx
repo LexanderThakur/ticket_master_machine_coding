@@ -4,6 +4,9 @@ import { Box, Typography, TextField, Stack, Button } from "@mui/material";
 import axios from "axios";
 const api = import.meta.env.VITE_API_URL;
 import { useNavigate } from "react-router-dom";
+
+import { login, register } from "./api/auth.js";
+
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,13 +18,10 @@ export default function Auth() {
       return;
     }
     try {
-      const response = await axios.post(api + "/auth/login/", {
-        username: email.trim(),
-        password: password.trim(),
-      });
+      const data = await login(email.trim(), password.trim());
 
-      localStorage.setItem("token", response.data.access);
-      console.log(localStorage.getItem("token"));
+      localStorage.setItem("token", data.access);
+
       navigate("/");
     } catch (error) {
       if (error.response?.status == 401) {
@@ -43,7 +43,7 @@ export default function Auth() {
       });
 
       localStorage.setItem("token", response.data.access);
-      console.log(localStorage.getItem("token"));
+
       navigate("/");
     } catch (error) {
       alert(error);

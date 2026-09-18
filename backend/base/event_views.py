@@ -15,6 +15,8 @@ User = get_user_model()
 
 
 class EventSer(serializers.ModelSerializer):
+    venue = serializers.CharField(source = "venue.name")
+    performer = serializers.CharField(source = "performer.name")
     class Meta:
         model = Event
         fields = "__all__"
