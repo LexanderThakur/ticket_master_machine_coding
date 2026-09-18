@@ -13,7 +13,9 @@ export default function Home() {
 
       setEvents(response.data.message);
       console.log(response.data.message);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   useEffect(() => {

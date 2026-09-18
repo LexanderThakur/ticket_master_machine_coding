@@ -28,26 +28,7 @@ def venue(request,venue_id):
 
 
 
-## GET all available seats for a event
 
-
-# class TicketSer(serializers.ModelSerializer):
-#     class  Meta:
-#         model =Ticket
-#         fields = ["event","seat","status","price"]
-
-# @api_view(["GET"])
-# def venue_available(request,venue_id,event_id,):
-
-
-
-#     available = Ticket.objects.filter(
-#         event=event_id,venue=venue_id,status='available'
-#         )
-#     ser = TicketSer(available,many=True)
-#     return Response({"message":ser.data})
-
-    
 
 
 
