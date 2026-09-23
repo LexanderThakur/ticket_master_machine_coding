@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'drf_spectacular',
+    'django_crontab',
     'corsheaders',
     'auth_app',
     'base'
@@ -141,3 +142,9 @@ REST_FRAMEWORK={
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+
+CRONJOBS = [
+    ('*/1 * * * *', 'base.cron.cron_job')
+]

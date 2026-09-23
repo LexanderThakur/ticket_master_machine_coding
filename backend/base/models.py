@@ -52,7 +52,7 @@ class Ticket(models.Model):
         max_digits=10,
         decimal_places=2
     )
-
+    reserved_at = models.DateTimeField(null=True,blank=True)
 
 
 

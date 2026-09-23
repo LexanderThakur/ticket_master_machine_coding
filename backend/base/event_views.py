@@ -25,7 +25,7 @@ class EventSer(serializers.ModelSerializer):
 class TicketSer(serializers.ModelSerializer):
     class  Meta:
         model =Ticket
-        fields = ["event","seat","status","price"]
+        fields = ["id","event","seat","status","price"]
 
 @api_view(["GET"])
 def event_detail(request,event_id):

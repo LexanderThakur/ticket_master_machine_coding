@@ -7,6 +7,8 @@ import {
   Paper,
   Divider,
   Button,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useParams } from "react-router-dom";
@@ -21,6 +23,12 @@ export default function EventDetail() {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [selected, setSelected] = useState([]);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    severity: "success",
+    message: "",
+  });
 
   const [event, setEvent] = useState({
     id: "1",
@@ -53,6 +61,40 @@ export default function EventDetail() {
 
       return [...prev, seat];
     });
+  }
+
+  async function handle_reserve() {
+    try {
+      let tickets = [];
+
+      for (const s of selected) {
+        tickets.push(ticketMap[s].id);
+      }
+      console.log(ticketMap);
+      console.log(tickets);
+      const response = await axios.post(
+        api + "/tickets/reserve/",
+        {
+          tickets,
+        },
+        {
+          headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+        },
+      );
+
+      setSnackbar({
+        open: true,
+        severity: "success",
+        message: "Seats reserved",
+      });
+    } catch (error) {
+      console.log(error);
+      setSnackbar({
+        open: true,
+        severity: "error",
+        message: "Please try again later",
+      });
+    }
   }
 
   async function sync_tickets() {
@@ -280,12 +322,30 @@ export default function EventDetail() {
               variant="contained"
               disabled={selected.length === 0}
               size="large"
+              onClick={() => handle_reserve()}
             >
-              Continue
+              Reserve & Pay
             </Button>
           </Stack>
         </Paper>
       </Stack>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        onClose={() => {
+          setSnackbar((prev) => ({ ...prev, open: false }));
+        }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
